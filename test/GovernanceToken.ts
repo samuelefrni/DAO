@@ -33,7 +33,6 @@ describe("GovernanceToken", () => {
       expect(await GovernanceToken.executive()).to.equal(0);
     });
   });
-
   describe("Testing buyGovernanceToken function", () => {
     it("Should revert if the sales are closed", async () => {
       const { owner, GovernanceToken } = await loadFixture(deploy);
