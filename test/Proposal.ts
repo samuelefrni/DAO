@@ -54,6 +54,22 @@ describe("Proposal", () => {
       expect(await Proposal.balanceOf(owner)).to.equal(ethers.parseEther("0"));
       expect((await Proposal.allProposal(0)).proposal).to.equal("Hello World");
     });
+    it("Should make the proposal and after that, change the voted bool to true", async () => {
+      const { owner, Proposal } = await loadFixture(deploy);
+
+      await Proposal.connect(owner).buyGovernanceToken(ethers.parseEther("5"), {
+        value: ethers.parseEther("5"),
+      });
+
+      await Proposal.connect(owner).closingTokenSale();
+
+      await Proposal.connect(owner).makeProposal("Hello World");
+
+      expect(await Proposal.balanceOf(owner)).to.equal(ethers.parseEther("0"));
+      expect((await Proposal.allProposal(0)).proposal).to.equal("Hello World");
+      expect((await Proposal._allDAOMember(0)).memberAddress).to.equal(owner);
+      expect((await Proposal._allDAOMember(0)).voted).to.equal(true);
+    });
   });
   describe("Testing searchProposal function", () => {
     it("Should revert if the proposal Id doesn't not found", async () => {

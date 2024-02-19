@@ -20,18 +20,20 @@ contract Vote is Proposal {
         if (balanceOf(msg.sender) < 1 ether) {
             _isDAOMember[msg.sender] = false;
         }
-        require(
-            _isDAOMember[msg.sender],
-            "You cannot vote if you are not a DAO member"
-        );
+        require(_isDAOMember[msg.sender], "You cannot vote");
 
-        _transfer(msg.sender, _contractAddress, 1000000000000000000);
+        bool proposalFound = false;
 
         for (uint i = 0; i < allProposal.length; i++) {
             if (allProposal[i].id == _proposalId) {
                 allProposal[i].forVotes++;
+                proposalFound = true;
             }
         }
+
+        require(proposalFound == true, "The proposal id was not found");
+
+        _transfer(msg.sender, _contractAddress, 1000000000000000000);
 
         for (uint i = 0; i < _allDAOMember.length; i++) {
             if (
@@ -52,18 +54,20 @@ contract Vote is Proposal {
         if (balanceOf(msg.sender) < 1 ether) {
             _isDAOMember[msg.sender] = false;
         }
-        require(
-            _isDAOMember[msg.sender],
-            "You cannot vote if you are not a DAO member"
-        );
+        require(_isDAOMember[msg.sender], "You cannot vote");
 
-        _transfer(msg.sender, address(this), 1000000000000000000);
+        bool proposalFound = false;
 
         for (uint i = 0; i < allProposal.length; i++) {
             if (allProposal[i].id == _proposalId) {
                 allProposal[i].againstVotes++;
+                proposalFound = true;
             }
         }
+
+        require(proposalFound == true, "The proposal id was not found");
+
+        _transfer(msg.sender, _contractAddress, 1000000000000000000);
 
         for (uint i = 0; i < _allDAOMember.length; i++) {
             if (
@@ -84,6 +88,6 @@ contract Vote is Proposal {
             }
         }
         vote = 0;
-        proposal = 1;
+        executive = 1;
     }
 }

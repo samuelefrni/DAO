@@ -53,6 +53,12 @@ contract Proposal is GovernanceToken {
             })
         );
 
+        for (uint i = 0; i < _allDAOMember.length; i++) {
+            if (_allDAOMember[i].memberAddress == msg.sender) {
+                _allDAOMember[i].voted = true;
+            }
+        }
+
         emit ProposalCreated(proposalId, msg.sender, _proposal);
     }
 
