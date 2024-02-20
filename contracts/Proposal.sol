@@ -12,7 +12,7 @@ contract Proposal is GovernanceToken {
         uint forVotes;
         uint againstVotes;
         bool executed;
-        string approved;
+        string status;
     }
 
     sProposal[] public allProposal;
@@ -49,7 +49,7 @@ contract Proposal is GovernanceToken {
                 forVotes: 0,
                 againstVotes: 0,
                 executed: false,
-                approved: "pending"
+                status: "pending"
             })
         );
 
@@ -74,6 +74,7 @@ contract Proposal is GovernanceToken {
     }
 
     function closeProposal() external onlyOwner {
+        require(proposal != 0, "Proposal are already closed");
         proposal = 0;
         vote = 1;
     }

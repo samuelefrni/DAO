@@ -108,6 +108,8 @@ describe("Proposal", () => {
     it("Should set the proposal to zero and the vote to 1", async () => {
       const { owner, Proposal } = await loadFixture(deploy);
 
+      await Proposal.connect(owner).closingTokenSale();
+
       await Proposal.connect(owner).closeProposal();
 
       expect(await Proposal.proposal()).to.equal(0);

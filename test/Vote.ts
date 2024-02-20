@@ -27,6 +27,8 @@ describe("Vote", () => {
     it("Should set the proposal to 0 and the vote to 1 after owner call closeProposal function", async () => {
       const { owner, Vote } = await loadFixture(deploy);
 
+      await Vote.connect(owner).closingTokenSale();
+
       await Vote.connect(owner).closeProposal();
 
       expect(await Vote.connect(owner).proposal()).to.equal(0);
@@ -168,6 +170,51 @@ describe("Vote", () => {
 
       expect((await Vote.allProposal(0)).againstVotes).to.equal(1);
       expect(await Vote.balanceOf(owner)).to.equal(ethers.parseEther("1"));
+    });
+  });
+  describe("Testing abstain function", () => {
+    it("Should revert if the sales are open", async () => {
+      const { owner, Vote } = await loadFixture(deploy);
+
+      await expect(Vote.abstain()).to.revertedWith(
+        "The sales must be closed to vote"
+      );
+    });
+    it("Should revert if the proposal are open", async () => {
+      const { owner, Vote } = await loadFixture(deploy);
+
+      await Vote.connect(owner).closingTokenSale();
+
+      await expect(Vote.abstain()).to.revertedWith(
+        "The proposal must be closed to vote"
+      );
+    });
+    it("Should revert if the sender does not have at least 1 GT", async () => {
+      const { owner, Vote } = await loadFixture(deploy);
+
+      await Vote.connect(owner).closingTokenSale();
+
+      await Vote.connect(owner).closeProposal();
+
+      await expect(Vote.connect(owner).abstain()).to.revertedWith(
+        "You cannot vote"
+      );
+    });
+    it("Should set the value 'voted' of the sender to true without taking GT", async () => {
+      const { owner, Vote } = await loadFixture(deploy);
+
+      await Vote.connect(owner).buyGovernanceToken(ethers.parseEther("2"), {
+        value: ethers.parseEther("2"),
+      });
+
+      await Vote.connect(owner).closingTokenSale();
+
+      await Vote.connect(owner).closeProposal();
+
+      await Vote.connect(owner).abstain();
+
+      expect(await Vote.balanceOf(owner)).to.equal(ethers.parseEther("2"));
+      expect((await Vote._allDAOMember(0)).voted).to.equal(true);
     });
   });
   describe("Testing closeVote function", () => {

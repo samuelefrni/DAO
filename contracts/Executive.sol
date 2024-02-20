@@ -19,15 +19,18 @@ contract Executive is Vote {
         uint totalForVotes = 0;
         uint totalAgainstVotes = 0;
 
+        bool proposalFound = false;
+
         for (uint i = 0; i < allProposal.length; i++) {
             if (allProposal[i].id == _proposalId) {
                 totalForVotes = allProposal[i].forVotes;
                 totalAgainstVotes = allProposal[i].againstVotes;
                 totalVotes = totalForVotes + totalAgainstVotes;
+                proposalFound = true;
             }
         }
 
-        require(totalVotes > 0, "Proposal not found");
+        require(proposalFound == true, "Proposal not found");
 
         uint percentageFor = (totalForVotes * 100) / totalVotes;
 
@@ -35,30 +38,24 @@ contract Executive is Vote {
             for (uint i = 0; i < allProposal.length; i++) {
                 require(
                     !allProposal[i].executed,
-                    "Proposal are already executed"
+                    "Proposal already executed, check the allProposal array or executedProposal to see the results"
                 );
                 if (allProposal[i].id == _proposalId) {
                     allProposal[i].executed = true;
-                    allProposal[i].approved = "rejected";
+                    allProposal[i].status = "rejected";
                 }
             }
-        }
-
-        require(
-            percentageFor >= 50,
-            "Rejected, votes in favor are less than 50%"
-        );
-
-        for (uint i = 0; i < allProposal.length; i++) {
-            if (allProposal[i].id == _proposalId) {
-                require(
-                    !allProposal[i].executed,
-                    "Proposal are already executed"
-                );
-                allProposal[i].executed = true;
-                allProposal[i].approved = "approved";
-                executedProposal.push(allProposal[i].id);
-                break;
+        } else {
+            for (uint i = 0; i < allProposal.length; i++) {
+                if (allProposal[i].id == _proposalId) {
+                    require(
+                        !allProposal[i].executed,
+                        "Proposal already executed, check the allProposal array or executedProposal to see the results"
+                    );
+                    allProposal[i].executed = true;
+                    allProposal[i].status = "approved";
+                    executedProposal.push(allProposal[i].id);
+                }
             }
         }
     }

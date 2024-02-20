@@ -13,7 +13,7 @@ contract Vote is Proposal {
         uint _price
     ) Proposal(_totalSupply, _price) {}
 
-    function voteFor(uint _proposalId) external {
+    modifier prerequisites() {
         require(sales == 0, "The sales must be closed to vote");
         require(proposal == 0, "The proposal must be closed to vote");
         require(vote == 1, "The vote must be open to vote");
@@ -21,7 +21,10 @@ contract Vote is Proposal {
             _isDAOMember[msg.sender] = false;
         }
         require(_isDAOMember[msg.sender], "You cannot vote");
+        _;
+    }
 
+    function voteFor(uint _proposalId) external prerequisites {
         bool proposalFound = false;
 
         for (uint i = 0; i < allProposal.length; i++) {
@@ -47,15 +50,7 @@ contract Vote is Proposal {
         emit voteForCreated(_proposalId, msg.sender);
     }
 
-    function voteAgainst(uint _proposalId) external {
-        require(sales == 0, "The sales must be closed to vote");
-        require(proposal == 0, "The proposal must be closed to vote");
-        require(vote == 1, "The vote must be open to vote");
-        if (balanceOf(msg.sender) < 1 ether) {
-            _isDAOMember[msg.sender] = false;
-        }
-        require(_isDAOMember[msg.sender], "You cannot vote");
-
+    function voteAgainst(uint _proposalId) external prerequisites {
         bool proposalFound = false;
 
         for (uint i = 0; i < allProposal.length; i++) {
@@ -81,7 +76,19 @@ contract Vote is Proposal {
         emit voteAgainstCreated(_proposalId, msg.sender);
     }
 
+    function abstain() external prerequisites {
+        for (uint i = 0; i < _allDAOMember.length; i++) {
+            if (
+                _allDAOMember[i].memberAddress == msg.sender &&
+                _allDAOMember[i].voted == false
+            ) {
+                _allDAOMember[i].voted = true;
+            }
+        }
+    }
+
     function closeVote() external onlyOwner {
+        require(vote != 0, "Vote are already closed");
         for (uint i = 0; i < _allDAOMember.length; i++) {
             if (!_allDAOMember[i].voted) {
                 revert("All DAO member should vote before close vote");
