@@ -36,7 +36,19 @@ describe("GovernanceToken", () => {
   });
   describe("Testing buyGovernanceToken function", () => {
     it("Should revert if the sales are closed", async () => {
-      const { owner, GovernanceToken } = await loadFixture(deploy);
+      const { owner, otherAccount, GovernanceToken } = await loadFixture(
+        deploy
+      );
+
+      await GovernanceToken.connect(owner).buyGovernanceToken(
+        ethers.parseEther("2"),
+        { value: ethers.parseEther("5") }
+      );
+
+      await GovernanceToken.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("2"),
+        { value: ethers.parseEther("5") }
+      );
 
       await GovernanceToken.connect(owner).closingTokenSale();
 
@@ -169,7 +181,19 @@ describe("GovernanceToken", () => {
       ).to.revertedWith("Only Owner can call this function");
     });
     it("Should revert if the owner try to close the sales but they are already closed", async () => {
-      const { owner, GovernanceToken } = await loadFixture(deploy);
+      const { owner, otherAccount, GovernanceToken } = await loadFixture(
+        deploy
+      );
+
+      await GovernanceToken.connect(owner).buyGovernanceToken(
+        ethers.parseEther("2"),
+        { value: ethers.parseEther("2") }
+      );
+
+      await GovernanceToken.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("2"),
+        { value: ethers.parseEther("2") }
+      );
 
       await GovernanceToken.connect(owner).closingTokenSale();
 
@@ -177,8 +201,29 @@ describe("GovernanceToken", () => {
         GovernanceToken.connect(owner).closingTokenSale()
       ).to.revertedWith("Sales are already closed");
     });
-    it("Should set sales to 0 and proposal to 1", async () => {
+    it("Should revert if DAO members are less than 10", async () => {
       const { owner, GovernanceToken } = await loadFixture(deploy);
+
+      await expect(
+        GovernanceToken.connect(owner).closingTokenSale()
+      ).to.revertedWith(
+        "To initialize the DAO process the members should be at least 2"
+      );
+    });
+    it("Should set sales to 0 and proposal to 1", async () => {
+      const { owner, otherAccount, GovernanceToken } = await loadFixture(
+        deploy
+      );
+
+      await GovernanceToken.connect(owner).buyGovernanceToken(
+        ethers.parseEther("2"),
+        { value: ethers.parseEther("2") }
+      );
+
+      await GovernanceToken.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("2"),
+        { value: ethers.parseEther("2") }
+      );
 
       await GovernanceToken.connect(owner).closingTokenSale();
 
@@ -202,7 +247,19 @@ describe("GovernanceToken", () => {
       ).to.revertedWith("Sales are already open");
     });
     it("Should revert if the owner try to reOpen the sales after the closingTokenSale function", async () => {
-      const { owner, GovernanceToken } = await loadFixture(deploy);
+      const { owner, otherAccount, GovernanceToken } = await loadFixture(
+        deploy
+      );
+
+      await GovernanceToken.connect(owner).buyGovernanceToken(
+        ethers.parseEther("2"),
+        { value: ethers.parseEther("2") }
+      );
+
+      await GovernanceToken.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("2"),
+        { value: ethers.parseEther("2") }
+      );
 
       await GovernanceToken.connect(owner).closingTokenSale();
 

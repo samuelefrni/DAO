@@ -17,7 +17,7 @@ contract GovernanceToken is ERC20 {
 
     mapping(address => bool) public _isDAOMember;
     sDAOMemberInfo[] public _allDAOMember;
-
+    
     // 0 => Close 1 => Open
     uint public sales = 1;
     uint public proposal = 0;
@@ -112,6 +112,8 @@ contract GovernanceToken is ERC20 {
     }
 
     function closingTokenSale() external onlyOwner {
+        // require(_allDAOMember.length > 1, "To initialize the DAO process the members should be at least 2"); //UNCOMMENT THIS LINE BEFORE TESTING
+        require(_allDAOMember.length > 9, "To initialize the DAO process the members should be at least 10"); //COMMENT THIS LINE BEFORE TESTING
         require(sales != 0, "Sales are already closed");
         sales = 0;
         proposal = 1;

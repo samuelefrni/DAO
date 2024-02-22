@@ -6,12 +6,19 @@ describe("Proposal", () => {
   async function deploy() {
     const totalSupply = ethers.parseEther("10");
     const priceToken = ethers.parseEther("1");
-    const [owner, otherAccount] = await ethers.getSigners();
+    const [owner, otherAccount, otherAccount2] = await ethers.getSigners();
     const Proposal = await ethers.deployContract("Proposal", [
       totalSupply,
       priceToken,
     ]);
-    return { totalSupply, priceToken, owner, otherAccount, Proposal };
+    return {
+      totalSupply,
+      priceToken,
+      owner,
+      otherAccount,
+      otherAccount2,
+      Proposal,
+    };
   }
   describe("Testing makeProposal function", () => {
     it("Should revert if the sales are open", async () => {
@@ -22,7 +29,18 @@ describe("Proposal", () => {
       ).to.revertedWith("The sales must be closed to make a proposal");
     });
     it("Should close the token sale and open the proposal", async () => {
-      const { owner, Proposal } = await loadFixture(deploy);
+      const { owner, otherAccount, Proposal } = await loadFixture(deploy);
+
+      await Proposal.connect(owner).buyGovernanceToken(ethers.parseEther("2"), {
+        value: ethers.parseEther("2"),
+      });
+
+      await Proposal.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("2"),
+        {
+          value: ethers.parseEther("2"),
+        }
+      );
 
       await Proposal.connect(owner).closingTokenSale();
 
@@ -30,22 +48,41 @@ describe("Proposal", () => {
       expect(await Proposal.proposal()).to.equal(1);
     });
     it("Should revert if the sender that call the makeProposal dont have at least 1 GT", async () => {
-      const { owner, Proposal } = await loadFixture(deploy);
+      const { owner, otherAccount, otherAccount2, Proposal } =
+        await loadFixture(deploy);
+
+      await Proposal.connect(owner).buyGovernanceToken(ethers.parseEther("2"), {
+        value: ethers.parseEther("2"),
+      });
+
+      await Proposal.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("2"),
+        {
+          value: ethers.parseEther("2"),
+        }
+      );
 
       await Proposal.connect(owner).closingTokenSale();
 
       await expect(
-        Proposal.connect(owner).makeProposal("Hello World")
+        Proposal.connect(otherAccount2).makeProposal("Hello World")
       ).to.revertedWith(
         "You cannot create proposals if you are not a DAO member"
       );
     });
     it("Should make the proposal and add it to the allProposal array after taking the tokens from the sender", async () => {
-      const { owner, Proposal } = await loadFixture(deploy);
+      const { owner, otherAccount, Proposal } = await loadFixture(deploy);
 
       await Proposal.connect(owner).buyGovernanceToken(ethers.parseEther("5"), {
         value: ethers.parseEther("5"),
       });
+
+      await Proposal.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("2"),
+        {
+          value: ethers.parseEther("2"),
+        }
+      );
 
       await Proposal.connect(owner).closingTokenSale();
 
@@ -55,11 +92,18 @@ describe("Proposal", () => {
       expect((await Proposal.allProposal(0)).proposal).to.equal("Hello World");
     });
     it("Should make the proposal and after that, change the voted bool to true", async () => {
-      const { owner, Proposal } = await loadFixture(deploy);
+      const { owner, otherAccount, Proposal } = await loadFixture(deploy);
 
       await Proposal.connect(owner).buyGovernanceToken(ethers.parseEther("5"), {
         value: ethers.parseEther("5"),
       });
+
+      await Proposal.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("5"),
+        {
+          value: ethers.parseEther("5"),
+        }
+      );
 
       await Proposal.connect(owner).closingTokenSale();
 
@@ -80,11 +124,18 @@ describe("Proposal", () => {
       ).to.revertedWith("Proposal not found");
     });
     it("Should return the allProposal object if the id match the search", async () => {
-      const { owner, Proposal } = await loadFixture(deploy);
+      const { owner, otherAccount, Proposal } = await loadFixture(deploy);
 
       await Proposal.connect(owner).buyGovernanceToken(ethers.parseEther("5"), {
         value: ethers.parseEther("5"),
       });
+
+      await Proposal.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("5"),
+        {
+          value: ethers.parseEther("5"),
+        }
+      );
 
       await Proposal.connect(owner).closingTokenSale();
 
@@ -106,7 +157,18 @@ describe("Proposal", () => {
       ).to.revertedWith("Only Owner can call this function");
     });
     it("Should set the proposal to zero and the vote to 1", async () => {
-      const { owner, Proposal } = await loadFixture(deploy);
+      const { owner, otherAccount, Proposal } = await loadFixture(deploy);
+
+      await Proposal.connect(owner).buyGovernanceToken(ethers.parseEther("2"), {
+        value: ethers.parseEther("2"),
+      });
+
+      await Proposal.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("2"),
+        {
+          value: ethers.parseEther("2"),
+        }
+      );
 
       await Proposal.connect(owner).closingTokenSale();
 
@@ -116,7 +178,18 @@ describe("Proposal", () => {
       expect(await Proposal.vote()).to.equal(1);
     });
     it("Should revert if the owner try to reOpen the sales after closing the proposal", async () => {
-      const { owner, Proposal } = await loadFixture(deploy);
+      const { owner, otherAccount, Proposal } = await loadFixture(deploy);
+
+      await Proposal.connect(owner).buyGovernanceToken(ethers.parseEther("2"), {
+        value: ethers.parseEther("2"),
+      });
+
+      await Proposal.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("2"),
+        {
+          value: ethers.parseEther("2"),
+        }
+      );
 
       await Proposal.connect(owner).closingTokenSale();
 

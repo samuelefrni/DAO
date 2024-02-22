@@ -6,16 +6,32 @@ describe("Vote", () => {
   async function deploy() {
     const totalSupply = ethers.parseEther("10");
     const priceToken = ethers.parseEther("1");
-    const [owner, otherAccount] = await ethers.getSigners();
+    const [owner, otherAccount, otherAccount2] = await ethers.getSigners();
     const Vote = await ethers.deployContract("Vote", [totalSupply, priceToken]);
-    return { totalSupply, priceToken, owner, otherAccount, Vote };
+    return {
+      totalSupply,
+      priceToken,
+      owner,
+      otherAccount,
+      otherAccount2,
+      Vote,
+    };
   }
   describe("Testing voteFor function", () => {
     it("Should revert if the sale are open, the proposal are open or the vote are closed", async () => {
-      const { owner, Vote } = await loadFixture(deploy);
+      const { owner, otherAccount, Vote } = await loadFixture(deploy);
 
       await expect(Vote.connect(owner).voteFor(9374)).to.revertedWith(
         "The sales must be closed to vote"
+      );
+
+      await Vote.connect(owner).buyGovernanceToken(ethers.parseEther("2"), {
+        value: ethers.parseEther("2"),
+      });
+
+      await Vote.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("2"),
+        { value: ethers.parseEther("2") }
       );
 
       await Vote.connect(owner).closingTokenSale();
@@ -25,7 +41,16 @@ describe("Vote", () => {
       );
     });
     it("Should set the proposal to 0 and the vote to 1 after owner call closeProposal function", async () => {
-      const { owner, Vote } = await loadFixture(deploy);
+      const { owner, otherAccount, Vote } = await loadFixture(deploy);
+
+      await Vote.connect(owner).buyGovernanceToken(ethers.parseEther("2"), {
+        value: ethers.parseEther("2"),
+      });
+
+      await Vote.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("2"),
+        { value: ethers.parseEther("2") }
+      );
 
       await Vote.connect(owner).closingTokenSale();
 
@@ -35,13 +60,24 @@ describe("Vote", () => {
       expect(await Vote.connect(owner).vote()).to.equal(1);
     });
     it("Should revert if the sender dont have at least 1 GT to vote", async () => {
-      const { owner, Vote } = await loadFixture(deploy);
+      const { owner, otherAccount, otherAccount2, Vote } = await loadFixture(
+        deploy
+      );
+
+      await Vote.connect(owner).buyGovernanceToken(ethers.parseEther("2"), {
+        value: ethers.parseEther("2"),
+      });
+
+      await Vote.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("2"),
+        { value: ethers.parseEther("2") }
+      );
 
       await Vote.connect(owner).closingTokenSale();
 
       await Vote.connect(owner).closeProposal();
 
-      await expect(Vote.connect(owner).voteFor(9472)).to.revertedWith(
+      await expect(Vote.connect(otherAccount2).voteFor(9472)).to.revertedWith(
         "You cannot vote"
       );
     });
@@ -98,10 +134,19 @@ describe("Vote", () => {
   });
   describe("Testing voteAgainst function", () => {
     it("Should revert if the sale are open, the proposal are open or the vote are closed", async () => {
-      const { owner, Vote } = await loadFixture(deploy);
+      const { owner, otherAccount, Vote } = await loadFixture(deploy);
 
       await expect(Vote.connect(owner).voteAgainst(9374)).to.revertedWith(
         "The sales must be closed to vote"
+      );
+
+      await Vote.connect(owner).buyGovernanceToken(ethers.parseEther("2"), {
+        value: ethers.parseEther("2"),
+      });
+
+      await Vote.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("2"),
+        { value: ethers.parseEther("2") }
       );
 
       await Vote.connect(owner).closingTokenSale();
@@ -111,15 +156,26 @@ describe("Vote", () => {
       );
     });
     it("Should revert if the sender dont have at least 1 GT to vote", async () => {
-      const { owner, Vote } = await loadFixture(deploy);
+      const { owner, otherAccount, otherAccount2, Vote } = await loadFixture(
+        deploy
+      );
+
+      await Vote.connect(owner).buyGovernanceToken(ethers.parseEther("2"), {
+        value: ethers.parseEther("2"),
+      });
+
+      await Vote.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("2"),
+        { value: ethers.parseEther("2") }
+      );
 
       await Vote.connect(owner).closingTokenSale();
 
       await Vote.connect(owner).closeProposal();
 
-      await expect(Vote.connect(owner).voteAgainst(9472)).to.revertedWith(
-        "You cannot vote"
-      );
+      await expect(
+        Vote.connect(otherAccount2).voteAgainst(9472)
+      ).to.revertedWith("You cannot vote");
     });
     it("Should be revert if the proposal ID is not found and the funds should not be taken", async () => {
       const { owner, otherAccount, Vote } = await loadFixture(deploy);
@@ -181,7 +237,16 @@ describe("Vote", () => {
       );
     });
     it("Should revert if the proposal are open", async () => {
-      const { owner, Vote } = await loadFixture(deploy);
+      const { owner, otherAccount, Vote } = await loadFixture(deploy);
+
+      await Vote.connect(owner).buyGovernanceToken(ethers.parseEther("2"), {
+        value: ethers.parseEther("2"),
+      });
+
+      await Vote.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("2"),
+        { value: ethers.parseEther("2") }
+      );
 
       await Vote.connect(owner).closingTokenSale();
 
@@ -190,22 +255,40 @@ describe("Vote", () => {
       );
     });
     it("Should revert if the sender does not have at least 1 GT", async () => {
-      const { owner, Vote } = await loadFixture(deploy);
+      const { owner, otherAccount, otherAccount2, Vote } = await loadFixture(
+        deploy
+      );
+
+      await Vote.connect(owner).buyGovernanceToken(ethers.parseEther("2"), {
+        value: ethers.parseEther("2"),
+      });
+
+      await Vote.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("2"),
+        { value: ethers.parseEther("2") }
+      );
 
       await Vote.connect(owner).closingTokenSale();
 
       await Vote.connect(owner).closeProposal();
 
-      await expect(Vote.connect(owner).abstain()).to.revertedWith(
+      await expect(Vote.connect(otherAccount2).abstain()).to.revertedWith(
         "You cannot vote"
       );
     });
     it("Should set the value 'voted' of the sender to true without taking GT", async () => {
-      const { owner, Vote } = await loadFixture(deploy);
+      const { owner, otherAccount, Vote } = await loadFixture(deploy);
 
       await Vote.connect(owner).buyGovernanceToken(ethers.parseEther("2"), {
         value: ethers.parseEther("2"),
       });
+
+      await Vote.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("2"),
+        {
+          value: ethers.parseEther("2"),
+        }
+      );
 
       await Vote.connect(owner).closingTokenSale();
 

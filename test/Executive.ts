@@ -22,7 +22,17 @@ describe("Executive", () => {
       );
     });
     it("Should revert if the proposal does not exist", async () => {
-      const { owner, Executive } = await loadFixture(deploy);
+      const { owner, otherAccount, Executive } = await loadFixture(deploy);
+
+      await Executive.connect(owner).buyGovernanceToken(
+        ethers.parseEther("2"),
+        { value: ethers.parseEther("2") }
+      );
+
+      await Executive.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("2"),
+        { value: ethers.parseEther("2") }
+      );
 
       await Executive.connect(owner).closingTokenSale();
 
