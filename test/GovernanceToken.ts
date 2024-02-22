@@ -18,6 +18,7 @@ describe("GovernanceToken", () => {
       const { totalSupply, priceToken, GovernanceToken } = await loadFixture(
         deploy
       );
+
       expect(await GovernanceToken.name()).to.equal("GovernanceToken");
       expect(await GovernanceToken.symbol()).to.equal("GT");
       expect(await GovernanceToken.totalSupply()).to.equal(totalSupply);
@@ -38,6 +39,7 @@ describe("GovernanceToken", () => {
       const { owner, GovernanceToken } = await loadFixture(deploy);
 
       await GovernanceToken.connect(owner).closingTokenSale();
+
       await expect(
         GovernanceToken.connect(owner).buyGovernanceToken(
           ethers.parseEther("2"),
@@ -74,10 +76,12 @@ describe("GovernanceToken", () => {
           { value: ethers.parseEther("10") }
         )
       ).to.revertedWith("You cant hold more than 5 GovernanceToken");
+
       await GovernanceToken.connect(otherAccount).buyGovernanceToken(
         ethers.parseEther("3"),
         { value: ethers.parseEther("10") }
       );
+
       await expect(
         GovernanceToken.connect(otherAccount).buyGovernanceToken(
           ethers.parseEther("3"),
@@ -102,12 +106,36 @@ describe("GovernanceToken", () => {
         ethers.parseEther("5"),
         { value: ethers.parseEther("10") }
       );
+
       expect(await GovernanceToken.balanceOf(otherAccount)).to.equal(
         ethers.parseEther("5")
       );
+
       expect(await GovernanceToken._isDAOMember(otherAccount)).to.equal(true);
+
       expect((await GovernanceToken._allDAOMember(0)).memberAddress).to.equal(
         otherAccount.address
+      );
+    });
+    it("Should transfer the correct amount of GovernanceToken to the buyer and set the right info about the sender", async () => {
+      const { otherAccount, GovernanceToken } = await loadFixture(deploy);
+
+      await GovernanceToken.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("3"),
+        { value: ethers.parseEther("3") }
+      );
+
+      expect((await GovernanceToken._allDAOMember(0)).balance).to.equal(
+        ethers.parseEther("3")
+      );
+
+      await GovernanceToken.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("2"),
+        { value: ethers.parseEther("2") }
+      );
+
+      expect((await GovernanceToken._allDAOMember(0)).balance).to.equal(
+        ethers.parseEther("5")
       );
     });
   });
@@ -144,6 +172,7 @@ describe("GovernanceToken", () => {
       const { owner, GovernanceToken } = await loadFixture(deploy);
 
       await GovernanceToken.connect(owner).closingTokenSale();
+
       await expect(
         GovernanceToken.connect(owner).closingTokenSale()
       ).to.revertedWith("Sales are already closed");
@@ -152,6 +181,7 @@ describe("GovernanceToken", () => {
       const { owner, GovernanceToken } = await loadFixture(deploy);
 
       await GovernanceToken.connect(owner).closingTokenSale();
+
       expect(await GovernanceToken.sales()).to.equal(0);
       expect(await GovernanceToken.proposal()).to.equal(1);
     });

@@ -35,6 +35,17 @@ contract GovernanceToken is ERC20 {
         _;
     }
 
+    modifier prerequisitesGT() {
+        require(sales != 1, "Sales are already open");
+        require(proposal == 0, "Proposal must be close to open token sale");
+        require(vote == 0, "Vote must be close to open token sale");
+        require(
+            executive == 0,
+            "The executive fase must be closed to open the token sales"
+        );
+        _;
+    }
+
     function price() external view returns (uint) {
         return _tokenPrice;
     }
@@ -74,6 +85,12 @@ contract GovernanceToken is ERC20 {
                     voted: false
                 })
             );
+        } else {
+            for (uint i = 0; i < _allDAOMember.length; i++) {
+                if (msg.sender == _allDAOMember[i].memberAddress) {
+                    _allDAOMember[i].balance += _amount;
+                }
+            }
         }
     }
 
@@ -89,6 +106,7 @@ contract GovernanceToken is ERC20 {
         for (uint i = 0; i < _allDAOMember.length; i++) {
             if (_allDAOMember[i].memberAddress == _sender) {
                 delete _allDAOMember[i];
+                _isDAOMember[_sender] = false;
             }
         }
     }
@@ -99,14 +117,7 @@ contract GovernanceToken is ERC20 {
         proposal = 1;
     }
 
-    function openTokenSale() external onlyOwner {
-        require(sales != 1, "Sales are already open");
-        require(proposal == 0, "Proposal must be close to open token sale");
-        require(vote == 0, "Vote must be close to open token sale");
-        require(
-            executive == 0,
-            "The executive fase must be closed to open the token sales"
-        );
+    function openTokenSale() external onlyOwner prerequisitesGT() {
         sales = 1;
     }
 

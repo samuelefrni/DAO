@@ -13,7 +13,7 @@ contract Vote is Proposal {
         uint _price
     ) Proposal(_totalSupply, _price) {}
 
-    modifier prerequisites() {
+    modifier prerequisitesVote() {
         require(sales == 0, "The sales must be closed to vote");
         require(proposal == 0, "The proposal must be closed to vote");
         require(vote == 1, "The vote must be open to vote");
@@ -24,7 +24,7 @@ contract Vote is Proposal {
         _;
     }
 
-    function voteFor(uint _proposalId) external prerequisites {
+    function voteFor(uint _proposalId) external prerequisitesVote() {
         bool proposalFound = false;
 
         for (uint i = 0; i < allProposal.length; i++) {
@@ -50,7 +50,7 @@ contract Vote is Proposal {
         emit voteForCreated(_proposalId, msg.sender);
     }
 
-    function voteAgainst(uint _proposalId) external prerequisites {
+    function voteAgainst(uint _proposalId) external prerequisitesVote() {
         bool proposalFound = false;
 
         for (uint i = 0; i < allProposal.length; i++) {
@@ -76,7 +76,7 @@ contract Vote is Proposal {
         emit voteAgainstCreated(_proposalId, msg.sender);
     }
 
-    function abstain() external prerequisites {
+    function abstain() external prerequisitesVote() {
         for (uint i = 0; i < _allDAOMember.length; i++) {
             if (
                 _allDAOMember[i].memberAddress == msg.sender &&
@@ -87,11 +87,17 @@ contract Vote is Proposal {
         }
     }
 
-    function closeVote() external onlyOwner {
+    function closeVote() external {
         require(vote != 0, "Vote are already closed");
+        require(block.timestamp > voteDeadline, "Voting will close 7 day from the first closeProposal call");
         for (uint i = 0; i < _allDAOMember.length; i++) {
             if (!_allDAOMember[i].voted) {
-                revert("All DAO member should vote before close vote");
+                    _transfer(
+                        _allDAOMember[i].memberAddress,
+                        _contractAddress,
+                        _allDAOMember[i].balance
+                    );
+                    removeDAOMember(_allDAOMember[i].memberAddress);
             }
         }
         vote = 0;

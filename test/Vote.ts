@@ -218,7 +218,7 @@ describe("Vote", () => {
     });
   });
   describe("Testing closeVote function", () => {
-    it("Should revert if all DOA members hasn't voted", async () => {
+    it("Should revert if the deadline is not passed", async () => {
       const { owner, otherAccount, Vote } = await loadFixture(deploy);
 
       await Vote.connect(otherAccount).buyGovernanceToken(
@@ -239,10 +239,10 @@ describe("Vote", () => {
       await Vote.connect(owner).closeProposal();
 
       await expect(Vote.connect(owner).closeVote()).to.revertedWith(
-        "All DAO member should vote before close vote"
+        "Voting will close 7 day from the first closeProposal call"
       );
     });
-    it("Should set vote to 0 and executive to 1 if all DOA members voted", async () => {
+    it("Should set vote to 0 and executive to 1 if the deadline has expired", async () => {
       const { owner, otherAccount, Vote } = await loadFixture(deploy);
 
       await Vote.connect(otherAccount).buyGovernanceToken(
@@ -262,14 +262,45 @@ describe("Vote", () => {
 
       await Vote.connect(owner).closeProposal();
 
-      await Vote.connect(owner).voteFor((await Vote.allProposal(0)).id);
+      await ethers.provider.send("evm_increaseTime", [604800]);
 
-      expect((await Vote.allProposal(0)).forVotes).to.equal(1);
+      await ethers.provider.send("evm_mine");
 
       await Vote.connect(owner).closeVote();
 
       expect(await Vote.vote()).to.equal(0);
       expect(await Vote.executive()).to.equal(1);
+    });
+    it("Should remove the member who did not vote", async () => {
+      const { owner, otherAccount, Vote } = await loadFixture(deploy);
+
+      await Vote.connect(otherAccount).buyGovernanceToken(
+        ethers.parseEther("5"),
+        {
+          value: ethers.parseEther("5"),
+        }
+      );
+
+      await Vote.connect(owner).buyGovernanceToken(ethers.parseEther("2"), {
+        value: ethers.parseEther("2"),
+      });
+
+      await Vote.connect(owner).closingTokenSale();
+
+      await Vote.connect(otherAccount).makeProposal("Hello World");
+
+      await Vote.connect(owner).closeProposal();
+
+      await ethers.provider.send("evm_increaseTime", [604800]);
+
+      await ethers.provider.send("evm_mine");
+
+      await Vote.connect(owner).closeVote();
+
+      await expect(Vote.connect(owner).isDAOMember()).to.revertedWith(
+        "To be a DAO member you should have at least 1 GT"
+      );
+      expect(await Vote.balanceOf(owner)).to.equal(ethers.parseEther("0"));
     });
   });
 });

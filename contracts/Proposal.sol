@@ -5,6 +5,8 @@ pragma solidity ^0.8.9;
 import "./GovernanceToken.sol";
 
 contract Proposal is GovernanceToken {
+    uint public voteDeadline;
+
     struct sProposal {
         uint id;
         address memberAddress;
@@ -18,6 +20,7 @@ contract Proposal is GovernanceToken {
     sProposal[] public allProposal;
 
     event ProposalCreated(uint id, address memberDAO, string proposal);
+    event voteDeadlineCreated(uint blockTimeSpamp);
 
     constructor(
         uint _totalSupply,
@@ -75,7 +78,9 @@ contract Proposal is GovernanceToken {
 
     function closeProposal() external onlyOwner {
         require(proposal != 0, "Proposal are already closed");
+        voteDeadline = block.timestamp + 7 days;
         proposal = 0;
         vote = 1;
+        emit voteDeadlineCreated(voteDeadline);
     }
 }

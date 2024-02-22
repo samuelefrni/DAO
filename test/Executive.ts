@@ -28,6 +28,10 @@ describe("Executive", () => {
 
       await Executive.connect(owner).closeProposal();
 
+      await ethers.provider.send("evm_increaseTime", [604800]);
+
+      await ethers.provider.send("evm_mine");
+
       await Executive.connect(owner).closeVote();
 
       await expect(Executive.executeProposal(1234)).to.revertedWith(
@@ -58,6 +62,10 @@ describe("Executive", () => {
           await Executive.allProposal(0)
         ).id
       );
+
+      await ethers.provider.send("evm_increaseTime", [604800]);
+
+      await ethers.provider.send("evm_mine");
 
       await Executive.connect(owner).closeVote();
 
@@ -90,6 +98,10 @@ describe("Executive", () => {
           await Executive.allProposal(0)
         ).id
       );
+
+      await ethers.provider.send("evm_increaseTime", [604800]);
+
+      await ethers.provider.send("evm_mine");
 
       await Executive.connect(owner).closeVote();
 
@@ -125,6 +137,10 @@ describe("Executive", () => {
           await Executive.allProposal(0)
         ).id
       );
+
+      await ethers.provider.send("evm_increaseTime", [604800]);
+
+      await ethers.provider.send("evm_mine");
 
       await Executive.connect(owner).closeVote();
 
@@ -177,6 +193,10 @@ describe("Executive", () => {
         ).id
       );
 
+      await ethers.provider.send("evm_increaseTime", [604800]);
+
+      await ethers.provider.send("evm_mine");
+
       await Executive.connect(owner).closeVote();
 
       await expect(Executive.connect(owner).closeExecutive()).to.revertedWith(
@@ -207,6 +227,10 @@ describe("Executive", () => {
           await Executive.allProposal(0)
         ).id
       );
+
+      await ethers.provider.send("evm_increaseTime", [604800]);
+
+      await ethers.provider.send("evm_mine");
 
       await Executive.connect(owner).closeVote();
 
