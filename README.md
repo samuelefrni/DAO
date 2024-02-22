@@ -39,9 +39,9 @@ To install and run this project locally, follow these steps:
 
 ### Important
 
-<div align="center"><img src="./assets/img/Screenshot 2024-02-22 194231.png" width="150px"></div>
+<div align="center"><img src="./assets/img/Screenshot 2024-02-22 194231.png""></div>
 
-Before running the "npx hardhat test" it is important to uncomment the revert in the first line and comment the other in the second line instead. This change was made for logistical reasons inherent to smart contracts testing.
+Before running the "npx hardhat test" it is important to uncomment the require in the first line and comment the other in the second line.
 
 ## Contributing
 
