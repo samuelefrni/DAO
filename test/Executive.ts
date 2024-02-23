@@ -4,8 +4,8 @@ import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 
 describe("Executive", () => {
   async function deploy() {
-    const totalSupply = ethers.parseEther("10");
-    const priceToken = ethers.parseEther("1");
+    const totalSupply = ethers.parseEther("100");
+    const priceToken = ethers.parseEther("0.2");
     const [owner, otherAccount] = await ethers.getSigners();
     const Executive = await ethers.deployContract("Executive", [
       totalSupply,

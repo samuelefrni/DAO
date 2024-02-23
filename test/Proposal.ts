@@ -4,9 +4,9 @@ import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 
 describe("Proposal", () => {
   async function deploy() {
-    const totalSupply = ethers.parseEther("10");
-    const priceToken = ethers.parseEther("1");
-    const [owner, otherAccount, otherAccount2] = await ethers.getSigners();
+    const totalSupply = ethers.parseEther("100");
+    const priceToken = ethers.parseEther("0.2");
+    const [owner, otherAccount, otherAccount3] = await ethers.getSigners();
     const Proposal = await ethers.deployContract("Proposal", [
       totalSupply,
       priceToken,
@@ -16,7 +16,7 @@ describe("Proposal", () => {
       priceToken,
       owner,
       otherAccount,
-      otherAccount2,
+      otherAccount3,
       Proposal,
     };
   }
@@ -48,7 +48,7 @@ describe("Proposal", () => {
       expect(await Proposal.proposal()).to.equal(1);
     });
     it("Should revert if the sender that call the makeProposal dont have at least 1 GT", async () => {
-      const { owner, otherAccount, otherAccount2, Proposal } =
+      const { owner, otherAccount, otherAccount3, Proposal } =
         await loadFixture(deploy);
 
       await Proposal.connect(owner).buyGovernanceToken(ethers.parseEther("2"), {
@@ -65,7 +65,7 @@ describe("Proposal", () => {
       await Proposal.connect(owner).closingTokenSale();
 
       await expect(
-        Proposal.connect(otherAccount2).makeProposal("Hello World")
+        Proposal.connect(otherAccount3).makeProposal("Hello World")
       ).to.revertedWith(
         "You cannot create proposals if you are not a DAO member"
       );

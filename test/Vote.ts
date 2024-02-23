@@ -4,16 +4,16 @@ import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 
 describe("Vote", () => {
   async function deploy() {
-    const totalSupply = ethers.parseEther("10");
-    const priceToken = ethers.parseEther("1");
-    const [owner, otherAccount, otherAccount2] = await ethers.getSigners();
+    const totalSupply = ethers.parseEther("100");
+    const priceToken = ethers.parseEther("0.2");
+    const [owner, otherAccount, otherAccount3] = await ethers.getSigners();
     const Vote = await ethers.deployContract("Vote", [totalSupply, priceToken]);
     return {
       totalSupply,
       priceToken,
       owner,
       otherAccount,
-      otherAccount2,
+      otherAccount3,
       Vote,
     };
   }
@@ -60,7 +60,7 @@ describe("Vote", () => {
       expect(await Vote.connect(owner).vote()).to.equal(1);
     });
     it("Should revert if the sender dont have at least 1 GT to vote", async () => {
-      const { owner, otherAccount, otherAccount2, Vote } = await loadFixture(
+      const { owner, otherAccount, otherAccount3, Vote } = await loadFixture(
         deploy
       );
 
@@ -77,7 +77,7 @@ describe("Vote", () => {
 
       await Vote.connect(owner).closeProposal();
 
-      await expect(Vote.connect(otherAccount2).voteFor(9472)).to.revertedWith(
+      await expect(Vote.connect(otherAccount3).voteFor(9472)).to.revertedWith(
         "You cannot vote"
       );
     });
@@ -156,7 +156,7 @@ describe("Vote", () => {
       );
     });
     it("Should revert if the sender dont have at least 1 GT to vote", async () => {
-      const { owner, otherAccount, otherAccount2, Vote } = await loadFixture(
+      const { owner, otherAccount, otherAccount3, Vote } = await loadFixture(
         deploy
       );
 
@@ -174,7 +174,7 @@ describe("Vote", () => {
       await Vote.connect(owner).closeProposal();
 
       await expect(
-        Vote.connect(otherAccount2).voteAgainst(9472)
+        Vote.connect(otherAccount3).voteAgainst(9472)
       ).to.revertedWith("You cannot vote");
     });
     it("Should be revert if the proposal ID is not found and the funds should not be taken", async () => {
@@ -255,7 +255,7 @@ describe("Vote", () => {
       );
     });
     it("Should revert if the sender does not have at least 1 GT", async () => {
-      const { owner, otherAccount, otherAccount2, Vote } = await loadFixture(
+      const { owner, otherAccount, otherAccount3, Vote } = await loadFixture(
         deploy
       );
 
@@ -272,7 +272,7 @@ describe("Vote", () => {
 
       await Vote.connect(owner).closeProposal();
 
-      await expect(Vote.connect(otherAccount2).abstain()).to.revertedWith(
+      await expect(Vote.connect(otherAccount3).abstain()).to.revertedWith(
         "You cannot vote"
       );
     });
