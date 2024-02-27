@@ -48,7 +48,7 @@ describe("Executive", () => {
         "Proposal not found"
       );
     });
-    it("Should execute the proposal and rejected it, after set the status to rejected and executed to true", async () => {
+    it("Should execute the proposal and rejected it, after set the status to rejected, executed to true and push it to executedProposal", async () => {
       const { owner, otherAccount, Executive } = await loadFixture(deploy);
 
       await Executive.connect(owner).buyGovernanceToken(
@@ -83,6 +83,10 @@ describe("Executive", () => {
 
       expect((await Executive.allProposal(0)).executed).to.equal(true);
       expect((await Executive.allProposal(0)).status).to.equal("rejected");
+      expect((await Executive.executedProposal(0)).id).to.equal(
+        (await Executive.allProposal(0)).id
+      );
+      expect((await Executive.executedProposal(0)).status).to.equal("rejected");
     });
     it("Should execute the proposal and approved it, after set the status to approved, executed to true and push it to executedProposal", async () => {
       const { owner, otherAccount, Executive } = await loadFixture(deploy);
@@ -119,9 +123,10 @@ describe("Executive", () => {
 
       expect((await Executive.allProposal(0)).executed).to.equal(true);
       expect((await Executive.allProposal(0)).status).to.equal("approved");
-      expect(await Executive.executedProposal(0)).to.equal(
+      expect((await Executive.executedProposal(0)).id).to.equal(
         (await Executive.allProposal(0)).id
       );
+      expect((await Executive.executedProposal(0)).status).to.equal("approved");
     });
     it("Should revert if the proposal are already executed", async () => {
       const { owner, otherAccount, Executive } = await loadFixture(deploy);

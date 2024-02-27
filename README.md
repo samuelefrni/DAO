@@ -39,9 +39,9 @@ To install and run this project locally, follow these steps:
 
 ### Important
 
-<div align="center"><img src="./assets/img/Screenshot 2024-02-22 194231.png""></div>
+<div align="center"><img src="./assets/img/Screenshot 2024-02-22 194231.png"></div>
 
-***Before running the "npx hardhat test"***
+**_Before running the "npx hardhat test"_**
 
 ## Contributing
 

@@ -7,6 +7,7 @@ import "./Proposal.sol";
 contract Vote is Proposal {
     event voteForCreated(uint proposalId, address memberDAO);
     event voteAgainstCreated(uint proposalId, address memberDAO);
+    event votedForAbstain(address memberDAO);
 
     constructor(
         uint _totalSupply,
@@ -85,6 +86,7 @@ contract Vote is Proposal {
                 _allDAOMember[i].voted = true;
             }
         }
+        emit votedForAbstain(msg.sender);
     }
 
     function closeVote() external {

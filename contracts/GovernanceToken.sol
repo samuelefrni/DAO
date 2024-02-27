@@ -59,8 +59,7 @@ contract GovernanceToken is ERC20 {
 
         require(msg.value >= totalAmount, "Insufficient funds");
         require(
-            _amount <= 5000000000000000000 &&
-                balanceOf(msg.sender) + _amount <= 5000000000000000000,
+            balanceOf(msg.sender) + _amount <= 5000000000000000000,
             "You cant hold more than 5 GovernanceToken"
         );
         require(
@@ -103,6 +102,7 @@ contract GovernanceToken is ERC20 {
     }
 
     function removeDAOMember(address _sender) internal {
+        require(_isDAOMember[_sender] == true, "The address is not a member of the DAO community");
         for (uint i = 0; i < _allDAOMember.length; i++) {
             if (_allDAOMember[i].memberAddress == _sender) {
                 delete _allDAOMember[i];

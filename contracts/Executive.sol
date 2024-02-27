@@ -5,7 +5,12 @@ pragma solidity ^0.8.9;
 import "./Vote.sol";
 
 contract Executive is Vote {
-    uint[] public executedProposal;
+    struct sExecutedProposal {
+        uint id;
+        string status;
+    }
+
+    sExecutedProposal[] public executedProposal;
 
     constructor(uint _totalSupply, uint _price) Vote(_totalSupply, _price) {}
 
@@ -20,6 +25,7 @@ contract Executive is Vote {
         uint totalAgainstVotes = 0;
 
         bool proposalFound = false;
+        uint indexProposalExecution;
 
         for (uint i = 0; i < allProposal.length; i++) {
             if (allProposal[i].id == _proposalId) {
@@ -27,6 +33,8 @@ contract Executive is Vote {
                 totalAgainstVotes = allProposal[i].againstVotes;
                 totalVotes = totalForVotes + totalAgainstVotes;
                 proposalFound = true;
+                indexProposalExecution = i;
+                break;
             }
         }
 
@@ -35,28 +43,31 @@ contract Executive is Vote {
         uint percentageFor = (totalForVotes * 100) / totalVotes;
 
         if (percentageFor < 50) {
-            for (uint i = 0; i < allProposal.length; i++) {
-                require(
-                    !allProposal[i].executed,
-                    "Proposal already executed, check the allProposal array or executedProposal to see the results"
-                );
-                if (allProposal[i].id == _proposalId) {
-                    allProposal[i].executed = true;
-                    allProposal[i].status = "rejected";
-                }
-            }
+            require(
+                !allProposal[indexProposalExecution].executed,
+                "Proposal already executed, check the allProposal array or executedProposal to see the results"
+            );
+            allProposal[indexProposalExecution].executed = true;
+            allProposal[indexProposalExecution].status = "rejected";
+            executedProposal.push(
+                sExecutedProposal({
+                    id: allProposal[indexProposalExecution].id,
+                    status: allProposal[indexProposalExecution].status
+                })
+            );
         } else {
-            for (uint i = 0; i < allProposal.length; i++) {
-                if (allProposal[i].id == _proposalId) {
-                    require(
-                        !allProposal[i].executed,
-                        "Proposal already executed, check the allProposal array or executedProposal to see the results"
-                    );
-                    allProposal[i].executed = true;
-                    allProposal[i].status = "approved";
-                    executedProposal.push(allProposal[i].id);
-                }
-            }
+            require(
+                !allProposal[indexProposalExecution].executed,
+                "Proposal already executed, check the allProposal array or executedProposal to see the results"
+            );
+            allProposal[indexProposalExecution].executed = true;
+            allProposal[indexProposalExecution].status = "approved";
+            executedProposal.push(
+                sExecutedProposal({
+                    id: allProposal[indexProposalExecution].id,
+                    status: allProposal[indexProposalExecution].status
+                })
+            );
         }
     }
 
