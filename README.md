@@ -27,6 +27,12 @@ In this project, I've implemented four Solidity contracts to facilitate the func
 
 These contracts collectively form the backbone of the DAO, enabling decentralized decision-making and governance among its participants.
 
+## About deployment
+
+<div align="center"><img src="./assets/img/Screenshot 2024-02-27 121135.png"></div>
+
+**_Before running the "npx hardhat test" or "npx hardhat compile"_**
+
 ## Installation
 
 To install and run this project locally, follow these steps:
